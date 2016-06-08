@@ -1,7 +1,7 @@
 {
   "name": "cweagans/composer-patches",
   "description": "Provides a way to patch Composer packages.",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "BSD",
   "type": "composer-plugin",
   "extra": {
@@ -19,7 +19,7 @@
   },
   "require-dev": {
     "composer/composer": "~1.0",
-    "phpunit/phpunit": "~4.6"
+    "codeception/codeception": "~2.0"
   },
   "autoload": {
     "psr-4": {"cweagans\\Composer\\": "src"}
