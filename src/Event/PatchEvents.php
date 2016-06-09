@@ -5,7 +5,7 @@
  * Dispatch events when patches are applied.
  */
 
-namespace cweagans\Composer;
+namespace cweagans\Composer\Event;
 
 class PatchEvents {
 
