@@ -21,8 +21,8 @@ install:
     - composer install
 
 script:
-    - [[ "$TRAVIS_PHP_VERSION" != "7.0" ]] || ./vendor/bin/codecept run
-    - [[ "$TRAVIS_PHP_VERSION" == "7.0" ]] && ./vendor/bin/codecept run --coverage-xml
+    - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run; fi;
+    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run --coverage-xml; fi;
 
 after_script:
-    - [[ "$TRAVIS_PHP_VERSION" == "7.0" ]] && ./vendor/bin/coveralls
+    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/coveralls; fi;
