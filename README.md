@@ -1,6 +1,12 @@
 # composer-patches
 
+[![Build Status](https://travis-ci.org/cweagans/composer-patches.svg?branch=2.x)](https://travis-ci.org/cweagans/composer-patches)
+[![Coverage Status](https://coveralls.io/repos/github/cweagans/composer-patches/badge.svg?branch=master)](https://coveralls.io/github/cweagans/composer-patches?branch=master)
+
 Simple patches plugin for Composer. Applies a patch from a local or remote file to any package required with composer.
+
+# NOTE: THIS DOCUMENT HAS NOT YET BEEN UPDATED FOR THE 2.x VERSION. THE INFO HERE IS PROBABLY WRONG.
+
 
 ## Usage
 
