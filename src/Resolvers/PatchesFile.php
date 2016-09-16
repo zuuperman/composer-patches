@@ -73,6 +73,13 @@ class PatchesFile extends ResolverBase {
         $error = json_last_error();
         if ($error !== JSON_ERROR_NONE) {
             switch ($error) {
+                case JSON_ERROR_SYNTAX:
+                    $msg = 'Syntax error, malformed JSON.';
+                    break;
+                // Because we don't care about testing PHP's JSON error handling
+                // in great detail, we're going to ignore the other cases for the
+                // purposes of code coverage reporting.
+                // @codeCoverageIgnoreStart
                 case JSON_ERROR_DEPTH:
                     $msg = 'Maximum stack depth exceeded.';
                     break;
@@ -82,15 +89,13 @@ class PatchesFile extends ResolverBase {
                 case JSON_ERROR_CTRL_CHAR:
                     $msg = 'Unexpected control character found.';
                     break;
-                case JSON_ERROR_SYNTAX:
-                    $msg = 'Syntax error, malformed JSON.';
-                    break;
                 case JSON_ERROR_UTF8:
                     $msg = 'Malformed UTF-8 characters, possibly incorrectly encoded.';
                     break;
                 default:
                     $msg = 'Unknown error.';
                     break;
+                // @codeCoverageIgnoreEnd
             }
 
             throw new InvalidPatchesFileException($msg);
