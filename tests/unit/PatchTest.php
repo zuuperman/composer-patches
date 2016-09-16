@@ -9,12 +9,80 @@ namespace cweagans\Composer\Tests;
 
 use Codeception\Test\Unit;
 use cweagans\Composer\Exception\DownloadFailureException;
+use cweagans\Composer\Exception\InvalidPatchException;
 use cweagans\Composer\Exception\VerificationFailureException;
 use cweagans\Composer\Patch;
 use cweagans\Composer\Tests\Dummy\PatchDummy;
 
 class PatchTest extends Unit
 {
+    public function testCreateFromJsonObject()
+    {
+        // No description.
+        try {
+            $json = new \stdClass();
+            $json->url = 'http://drupal.org';
+            $patch = Patch::createFromJsonObject('test/package', $json, 'test');
+        }
+        catch (InvalidPatchException $e) {
+            $this->assertEquals('All patches must have a description and URL.', $e->getMessage());
+        }
+
+        // No URL.
+        try {
+            $json = new \stdClass();
+            $json->description = 'Test patch';
+            $patch = Patch::createFromJsonObject('test/package', $json, 'test');
+        }
+        catch (InvalidPatchException $e) {
+            $this->assertEquals('All patches must have a description and URL.', $e->getMessage());
+        }
+
+        // Happy path.
+        $json = new \stdClass();
+        $json->url = 'http://drupal.org';
+        $json->description = 'Test patch';
+        $patch = Patch::createFromJsonObject('test/package', $json, 'test');
+
+        $this->assertEquals('http://drupal.org', $patch->getUrl());
+        $this->assertEquals('Test patch', $patch->getDescription());
+        $this->assertEquals('test/package', $patch->getPackageName());
+        $this->assertEquals('test', $patch->getPatchType());
+        $this->assertEquals(Patch::NO_CHECK_HASH, $patch->getHash());
+        $this->assertEquals(Patch::PATCH_LEVEL_AUTO, $patch->getPatchLevel());
+
+        // Happy path + hash.
+        $json = new \stdClass();
+        $json->url = 'http://drupal.org';
+        $json->description = 'Test patch';
+        $json->hash = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
+        $patch = Patch::createFromJsonObject('test/package', $json, 'test');
+
+        $this->assertEquals('http://drupal.org', $patch->getUrl());
+        $this->assertEquals('Test patch', $patch->getDescription());
+        $this->assertEquals('test/package', $patch->getPackageName());
+        $this->assertEquals('test', $patch->getPatchType());
+        $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $patch->getHash());
+        $this->assertEquals(Patch::PATCH_LEVEL_AUTO, $patch->getPatchLevel());
+
+        // Happy path + patch level.
+        $json = new \stdClass();
+        $json->url = 'http://drupal.org';
+        $json->description = 'Test patch';
+        $json->hash = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
+        $json->patch_level = 3;
+        $patch = Patch::createFromJsonObject('test/package', $json, 'test');
+
+        $this->assertEquals('http://drupal.org', $patch->getUrl());
+        $this->assertEquals('Test patch', $patch->getDescription());
+        $this->assertEquals('test/package', $patch->getPackageName());
+        $this->assertEquals('test', $patch->getPatchType());
+        $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $patch->getHash());
+        $this->assertEquals(3, $patch->getPatchLevel());
+
+
+    }
+
     /**
      * Test the getters for the Patch object.
      */

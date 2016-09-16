@@ -138,23 +138,26 @@ class Patch
      */
     public static function createFromJsonObject($package, $jsonObject, $type)
     {
+        if (!is_array($jsonObject)) {
+            $jsonObject = (array)$jsonObject;
+        }
         // We always have to have a description and URL.
-        if (!isset($jsonObject->description) || !isset($jsonObject->url)) {
+        if (!isset($jsonObject['description']) || !isset($jsonObject['url'])) {
             throw new InvalidPatchException('All patches must have a description and URL.');
         }
-        $description = $jsonObject->description;
-        $url = $jsonObject->url;
+        $description = $jsonObject['description'];
+        $url = $jsonObject['url'];
 
         // If there's a hash, use it.
         $hash = NULL;
-        if (isset($jsonObject->hash)) {
-            $hash = $jsonObject->hash;
+        if (isset($jsonObject['hash'])) {
+            $hash = $jsonObject['hash'];
         }
 
         // If there's a patch level, use it.
         $patch_level = NULL;
-        if (isset($jsonObject->patch_level)) {
-            $patch_level = $jsonObject->patch_level;
+        if (isset($jsonObject['patch_level'])) {
+            $patch_level = $jsonObject['patch_level'];
         }
 
         // Finally, create a new instance of this class.
