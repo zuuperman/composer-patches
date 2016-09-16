@@ -8,36 +8,36 @@
 namespace cweagans\Composer\Event;
 
 use Composer\EventDispatcher\Event;
-use cweagans\Composer\Operation\PatchOperation;
+use cweagans\Composer\Patch;
 
 class PatchEvent extends Event {
 
     /**
-     * @var PatchOperation;
+     * @var Patch;
      */
-    protected $operation;
+    protected $patch;
 
     /**
      * Constructs a PatchEvent object.
      *
      * @param string $eventName
      *   See constants in PatchEvents for allowed values.
-     * @param PatchOperation $operation
-     *   The operation that emitted this event.
+     * @param Patch $patch
+     *   The patch that emitted this event.
      */
-    public function __construct($eventName, PatchOperation $operation) {
+    public function __construct($eventName, Patch $patch) {
         parent::__construct($eventName);
-        $this->operation = $operation;
+        $this->patch = $patch;
     }
 
     /**
      * Returns the PatchOperation that emitted this event.
      *
-     * @return PatchOperation
+     * @return Patch
      */
-    public function getOperation()
+    public function getPatch()
     {
-        return $this->operation;
+        return $this->patch;
     }
 
 }

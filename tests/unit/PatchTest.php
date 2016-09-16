@@ -20,23 +20,29 @@ class PatchTest extends Unit
      */
     public function testPatchGetters()
     {
-        $patch = new Patch('A test patch', 'https://www.drupal.org');
+        $patch = new Patch('drupal/drupal', 'A test patch', 'https://www.drupal.org', 'test');
+        $this->assertEquals('drupal/drupal', $patch->getPackageName());
         $this->assertEquals('A test patch', $patch->getDescription());
         $this->assertEquals('https://www.drupal.org', $patch->getUrl());
+        $this->assertEquals('test', $patch->getPatchType());
         $this->assertEquals(Patch::NO_CHECK_HASH, $patch->getHash());
         $this->assertEquals(Patch::PATCH_LEVEL_AUTO, $patch->getPatchLevel());
         $this->assertEquals(FALSE, $patch->isVerified());
 
-        $patch = new Patch('A test patch', 'https://www.drupal.org', 'da39a3ee5e6b4b0d3255bfef95601890afd80709');
+        $patch = new Patch('drupal/drupal', 'A test patch', 'https://www.drupal.org', 'test', 'da39a3ee5e6b4b0d3255bfef95601890afd80709');
+        $this->assertEquals('drupal/drupal', $patch->getPackageName());
         $this->assertEquals('A test patch', $patch->getDescription());
         $this->assertEquals('https://www.drupal.org', $patch->getUrl());
+        $this->assertEquals('test', $patch->getPatchType());
         $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $patch->getHash());
         $this->assertEquals(Patch::PATCH_LEVEL_AUTO, $patch->getPatchLevel());
         $this->assertEquals(FALSE, $patch->isVerified());
 
-        $patch = new Patch('A test patch', 'https://www.drupal.org', 'da39a3ee5e6b4b0d3255bfef95601890afd80709', 1);
+        $patch = new Patch('drupal/drupal', 'A test patch', 'https://www.drupal.org', 'test', 'da39a3ee5e6b4b0d3255bfef95601890afd80709', 1);
+        $this->assertEquals('drupal/drupal', $patch->getPackageName());
         $this->assertEquals('A test patch', $patch->getDescription());
         $this->assertEquals('https://www.drupal.org', $patch->getUrl());
+        $this->assertEquals('test', $patch->getPatchType());
         $this->assertEquals('da39a3ee5e6b4b0d3255bfef95601890afd80709', $patch->getHash());
         $this->assertEquals(1, $patch->getPatchLevel());
         $this->assertEquals(FALSE, $patch->isVerified());
@@ -48,7 +54,7 @@ class PatchTest extends Unit
     public function testInvalidSha1Detection()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $patch = new Patch('A test patch', 'https://www.drupal.org', 'not a sha1 hash');
+        $patch = new Patch('drupal/drupal', 'A test patch', 'https://www.drupal.org', 'test', 'not a sha1 hash');
     }
 
     /**
@@ -60,7 +66,7 @@ class PatchTest extends Unit
 
         // If the file exists (which is does if the touch() call didn't fail),
         // the Patch class should automatically set the local path.
-        $patch = new PatchDummy('A local patch', '/tmp/test.patch');
+        $patch = new PatchDummy('drupal/drupal', 'A local patch', '/tmp/test.patch', 'test');
         $this->assertEquals('/tmp/test.patch', $patch->getLocalPath());
 
         // The download() method should be essentially a no-op for patches that
@@ -82,13 +88,13 @@ class PatchTest extends Unit
     public function testPatchDownload()
     {
         // Happy path.
-        $patch = new PatchDummy('A test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch');
+        $patch = new PatchDummy('drupal/drupal', 'A test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test');
         $patch->download();
         $this->assertTrue(file_exists($patch->getLocalPath()));
 
         // Non-existent URL.
         try {
-            $patch = new PatchDummy('A test patch', 'http://example.com/asdf.patch');
+            $patch = new PatchDummy('drupal/drupal', 'A test patch', 'http://example.com/asdf.patch', 'test');
             $patch->download();
         }
         catch (DownloadFailureException $e) {
@@ -97,7 +103,7 @@ class PatchTest extends Unit
 
         // Valid patch URL, but simulated unwritable local filesystem
         try {
-            $patch = new PatchDummy('A test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch');
+            $patch = new PatchDummy('drupal/drupal', 'A test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test');
             $patch->download('/test.patch');
         }
         catch (DownloadFailureException $e) {
@@ -113,13 +119,13 @@ class PatchTest extends Unit
     public function testVerifyPatch()
     {
         // Happy path.
-        $patch = new Patch('Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'd0f5d393fbbcb0a6836b5b89808cda16fe442cc3');
+        $patch = new Patch('drupal/drupal', 'Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test', 'd0f5d393fbbcb0a6836b5b89808cda16fe442cc3');
         $patch->download();
         $patch->verifyPatch();
         $this->assertEquals(TRUE, $patch->isVerified());
 
         // Expected failure: verifying without downloading first.
-        $patch = new Patch('Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch');
+        $patch = new Patch('drupal/drupal', 'Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test');
         try {
             $patch->verifyPatch();
         }
@@ -130,7 +136,7 @@ class PatchTest extends Unit
         // Expected failure: Can't load data from path.
         // Setting a fake test path via PatchDummy to ensure that the patch can't
         // be loaded.
-        $patch = new PatchDummy('Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch');
+        $patch = new PatchDummy('drupal/drupal', 'Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test');
         $patch->setLocalPath('/test.patch');
         try {
             $patch->verifyPatch();
@@ -140,13 +146,13 @@ class PatchTest extends Unit
         }
 
         // Ensure that a patch instantiated without a hash gets a hash on verify.
-        $patch = new PatchDummy('Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch');
+        $patch = new PatchDummy('drupal/drupal', 'Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test');
         $patch->download();
         $patch->verifyPatch();
         $this->assertEquals('d0f5d393fbbcb0a6836b5b89808cda16fe442cc3', $patch->getHash());
 
         // Ensure that a patch with a mismatched hash throws an exception.
-        $patch = new PatchDummy('Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'd0f5d393fbbcb0a6836b5b89808cda16fe442cc4');
+        $patch = new PatchDummy('drupal/drupal', 'Test patch', 'https://patch-diff.githubusercontent.com/raw/cweagans/composer-patches/pull/6.patch', 'test', 'd0f5d393fbbcb0a6836b5b89808cda16fe442cc4');
         $patch->download();
         try {
             $patch->verifyPatch();

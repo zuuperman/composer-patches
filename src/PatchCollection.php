@@ -2,50 +2,40 @@
 
 namespace cweagans\Composer;
 
-use cweagans\Composer\Operation\PatchOperation;
+use cweagans\Composer\Patch;
 
 class PatchCollection
 {
     /**
-     * @var PatchOperation[]
+     * @var Patch[]
      */
-    protected $patchOperations;
+    protected $patches;
 
     /**
-     * Add a PatchOperation to the list.
+     * Add a patch to the list.
      *
-     * @param PatchOperation $operation
+     * @param Patch $patch
      */
-    public function addPatch(PatchOperation $operation)
+    public function addPatch(Patch $patch)
     {
-        $this->patchOperations[] = $operation;
+        $this->patches[] = $patch;
     }
 
     /**
-     * Return all known patch operations, root first and then dependencies.
+     * Return the list of patches.
      *
-     * @return \Generator
+     * @return Patch[]
      */
     public function getPatches($type = 'all')
     {
-        switch ($type) {
-            case 'root':
-                $operations = array_filter($this->patchOperations, function(PatchOperation $operation) {
-                    return ($operation->getPatchType() === PatchOperation::TYPE_ROOT_PATCH);
-                });
-                break;
-            case 'dependency':
-                $operations = array_filter($this->patchOperations, function(PatchOperation $operation) {
-                    return ($operation->getPatchType() === PatchOperation::TYPE_DEPENDENCY_PATCH);
-                });
-                break;
-            case 'all':
-            default:
-                $operations = $this->patchOperations;
+        $patches = $this->patches;
+
+        if ($type != 'all') {
+            $patches = array_filter($this->patches, function (Patch $patch) use ($type) {
+                return ($patch->getPatchType() === $type);
+            });
         }
 
-        foreach ($operations as $operation) {
-            yield $operation;
-        }
+        return $patches;
     }
 }

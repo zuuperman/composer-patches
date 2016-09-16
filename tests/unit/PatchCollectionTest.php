@@ -10,7 +10,6 @@ namespace cweagans\Composer\Tests;
 use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use Composer\Package\Package;
-use cweagans\Composer\Operation\PatchOperation;
 use cweagans\Composer\Patch;
 use cweagans\Composer\Tests\Dummy\PatchCollectionDummy;
 
@@ -19,69 +18,58 @@ class PatchCollectionTest extends Unit
     public function testPatchCollection()
     {
         // Create a PatchCollection and populate it with data.
-        // We're using the Dummy class because it adds a way to check the Operation counts.
+        // We're using the Dummy class because it adds a way to check the Patch counts.
         $patchCollection = new PatchCollectionDummy();
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_ROOT_PATCH));
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_ROOT_PATCH));
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_ROOT_PATCH));
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_DEPENDENCY_PATCH));
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_DEPENDENCY_PATCH));
-        $patchCollection->addPatch($this->getPatchOperation('', PatchOperation::TYPE_DEPENDENCY_PATCH));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'dependency'));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'dependency'));
+        $patchCollection->addPatch($this->getMockPatch('test/package', 'dependency'));
 
         // Verify that we have the right number of patches here.
         $this->assertEquals(6, $patchCollection->getPatchCount());
-        $this->assertEquals(3, $patchCollection->getPatchCount(PatchOperation::TYPE_ROOT_PATCH));
-        $this->assertEquals(3, $patchCollection->getPatchCount(PatchOperation::TYPE_DEPENDENCY_PATCH));
+        $this->assertEquals(3, $patchCollection->getPatchCount('root'));
+        $this->assertEquals(3, $patchCollection->getPatchCount('dependency'));
 
         // Verify that we get operation objects back and that the subelements work.
         $count = 0;
-        foreach ($patchCollection->getPatches('all') as $operation) {
-            /** @var PatchOperation $operation */
-            $this->assertEquals('Test patch', $operation->getPatch()->getDescription());
-            $this->assertEquals('https://example.com/asdf.patch', $operation->getPatch()->getUrl());
-            $this->assertContains('test/package', $operation->getPackage()->getName());
+        foreach ($patchCollection->getPatches('all') as $patch) {
+            $this->assertEquals('Test Patch', $patch->getDescription());
+            $this->assertEquals('https://example.com/asdf.patch', $patch->getUrl());
+            $this->assertEquals('test/package', $patch->getPackageName());
             $count++;
         }
 
         // Double check the count.
-        $this->assertEquals($count, $patchCollection->getPatchCount());
+        $this->assertEquals($count, $patchCollection->getPatchCount('all'));
 
-        // Ensure that we only get root patches back when we request them
+        // Ensure that we only get patches of a specific type back.
         $count = 0;
-        foreach ($patchCollection->getPatches(PatchOperation::TYPE_ROOT_PATCH) as $operation) {
-            /** @var PatchOperation $operation */
-            $this->assertEquals(PatchOperation::TYPE_ROOT_PATCH, $operation->getPatchType());
+        foreach ($patchCollection->getPatches('root') as $patch) {
+            $this->assertEquals('root', $patch->getPatchType());
             $count++;
         }
-        $this->assertEquals($count, $patchCollection->getPatchCount(PatchOperation::TYPE_ROOT_PATCH));
+        $this->assertEquals($count, $patchCollection->getPatchCount('root'));
 
-        // Ensure that we only get dependency patches back when we request them
+        // Same, but for dependency patches.
         $count = 0;
-        foreach ($patchCollection->getPatches(PatchOperation::TYPE_DEPENDENCY_PATCH) as $operation) {
-            /** @var PatchOperation $operation */
-            $this->assertEquals(PatchOperation::TYPE_DEPENDENCY_PATCH, $operation->getPatchType());
+        foreach ($patchCollection->getPatches('dependency') as $patch) {
+            $this->assertEquals('dependency', $patch->getPatchType());
             $count++;
         }
-        $this->assertEquals($count, $patchCollection->getPatchCount(PatchOperation::TYPE_DEPENDENCY_PATCH));
+        $this->assertEquals($count, $patchCollection->getPatchCount('dependency'));
+
     }
 
-    protected function getPatchOperation($packageName = '', $type = 'root') {
-        // Generate a package name if not supplied.
-        if ($packageName == '') {
-            $packageName = 'test/package' . uniqid();
-        }
-
-        $operation = Stub::make(PatchOperation::class, [
-            'getPatchType' => $type,
-            'getPackage' => Stub::make(Package::class, [
-                'getName' => $packageName,
-            ]),
-            'getPatch' => Stub::make(Patch::class, [
-                'description' => 'Test patch',
-                'url' => 'https://example.com/asdf.patch',
-            ]),
+    protected function getMockPatch($packageName = 'test/package', $type = 'root') {
+        // Return a mocked Patch
+        return Stub::make(Patch::class, [
+            'description' => 'Test Patch',
+            'url' => 'https://example.com/asdf.patch',
+            'type' => $type,
+            'package' => $packageName,
         ]);
-
-        return $operation;
     }
+    
 }

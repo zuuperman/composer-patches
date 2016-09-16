@@ -23,16 +23,16 @@ class PatchEventTest extends Unit
      *
      * @param string $eventName
      *   The name of the event.
-     * @param PatchOperation $operation
-     *   The PatchOperation object that relates a Patch to a Package.
+     * @param Patch $patch
+     *   The Patch that emitted the event.
      */
-    public function testPatchEventGetters($eventName, PatchOperation $operation)
+    public function testPatchEventGetters($eventName, Patch $patch)
     {
-        $patch_event = new PatchEvent($eventName, $operation);
+        $patch_event = new PatchEvent($eventName, $patch);
         $this->assertEquals($eventName, $patch_event->getName());
-        $this->assertEquals($operation, $patch_event->getOperation());
-        $this->assertEquals('A test patch', $patch_event->getOperation()->getPatch()->getDescription());
-        $this->assertEquals('https://www.drupal.org', $patch_event->getOperation()->getPatch()->getUrl());
+        $this->assertEquals($patch, $patch_event->getPatch());
+        $this->assertEquals('A test patch', $patch_event->getPatch()->getDescription());
+        $this->assertEquals('https://www.drupal.org', $patch_event->getPatch()->getUrl());
     }
 
     /**
@@ -43,12 +43,10 @@ class PatchEventTest extends Unit
      */
     public function patchEventDataProvider()
     {
-        $package = Stub::make('Composer\Package\Package');
-        $patch = new Patch('A test patch', 'https://www.drupal.org');
-        $operation = new PatchOperation($package, $patch, 'root');
+        $patch = new Patch('test/patch', 'A test patch', 'https://www.drupal.org', 'root');
         return array(
-            array(PatchEvents::PRE_PATCH_APPLY, $operation),
-            array(PatchEvents::POST_PATCH_APPLY, $operation),
+            array(PatchEvents::PRE_PATCH_APPLY, $patch),
+            array(PatchEvents::POST_PATCH_APPLY, $patch),
         );
     }
 }

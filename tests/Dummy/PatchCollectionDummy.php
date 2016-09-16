@@ -2,7 +2,6 @@
 
 namespace cweagans\Composer\Tests\Dummy;
 
-use cweagans\Composer\Operation\PatchOperation;
 use cweagans\Composer\PatchCollection;
 
 class PatchCollectionDummy extends PatchCollection
@@ -14,17 +13,6 @@ class PatchCollectionDummy extends PatchCollection
      * @return int
      */
     public function getPatchCount($type = 'all') {
-        switch ($type) {
-            case 'all':
-                return count($this->patchOperations);
-            case PatchOperation::TYPE_ROOT_PATCH:
-                return count(array_filter($this->patchOperations, function(PatchOperation $operation) {
-                    return ($operation->getPatchType() === PatchOperation::TYPE_ROOT_PATCH);
-                }));
-            case PatchOperation::TYPE_DEPENDENCY_PATCH:
-                return count(array_filter($this->patchOperations, function(PatchOperation $operation) {
-                    return ($operation->getPatchType() === PatchOperation::TYPE_DEPENDENCY_PATCH);
-                }));
-        }
+        return count($this->getPatches($type));
     }
 }

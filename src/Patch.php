@@ -8,6 +8,7 @@
 namespace cweagans\Composer;
 
 use cweagans\Composer\Exception\DownloadFailureException;
+use cweagans\Composer\Exception\InvalidPatchException;
 use cweagans\Composer\Exception\VerificationFailureException;
 
 class Patch
@@ -27,6 +28,12 @@ class Patch
      * @var string
      */
     const NO_CHECK_HASH = 'nocheck';
+
+    /**
+     * @var string
+     *   The package that this patch applies to.
+     */
+    protected $package;
 
     /**
      * @var string
@@ -54,6 +61,13 @@ class Patch
 
     /**
      * @var string
+     *   The type of patch this object represents. Can be any arbitrary string.
+     *   The specific string is chosen by the resolver that added the patch.
+     */
+    protected $type;
+
+    /**
+     * @var string
      *   The preferred patch level to use when applying a patch. When this value
      *   is set, *only* this patch level will be attempted. Should be a positive
      *   integer or self::PATCH_LEVEL_AUTO.
@@ -72,15 +86,19 @@ class Patch
     /**
      * Patch constructor.
      *
+     * @param $package
      * @param $description
      * @param $url
+     * @param $type
      * @param $hash
      * @param $patchLevel
      */
-    public function __construct($description, $url, $hash = NULL, $patchLevel = NULL)
+    public function __construct($package, $description, $url, $type, $hash = NULL, $patchLevel = NULL)
     {
+        $this->package = $package;
         $this->description = $description;
         $this->url = $url;
+        $this->type = $type;
 
         // If the file exists locally, then we can just set the localPath now
         // and save some work later.
@@ -103,6 +121,60 @@ class Patch
         if (isset($patchLevel)) {
             $this->patchLevel = $patchLevel;
         }
+    }
+
+    /**
+     * Creates a Patch object from an object parsed from a composer.json patches array.
+     *
+     * @param string $package
+     *   The package the patch should be applied to.
+     * @param \stdClass $jsonObject
+     *   The JSON object parsed from composer.json
+     * @param string $type
+     *   The type of patch.
+     *
+     * @throws InvalidPatchException
+     * @return Patch
+     */
+    public static function createFromJsonObject($package, $jsonObject, $type)
+    {
+        // We always have to have a description and URL.
+        if (!isset($jsonObject->description) || !isset($jsonObject->url)) {
+            throw new InvalidPatchException('All patches must have a description and URL.');
+        }
+        $description = $jsonObject->description;
+        $url = $jsonObject->url;
+
+        // If there's a hash, use it.
+        $hash = NULL;
+        if (isset($jsonObject->hash)) {
+            $hash = $jsonObject->hash;
+        }
+
+        // If there's a patch level, use it.
+        $patch_level = NULL;
+        if (isset($jsonObject->patch_level)) {
+            $patch_level = $jsonObject->patch_level;
+        }
+
+        // Finally, create a new instance of this class.
+        return new static($package, $description, $url, $type, $hash, $patch_level);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPackageName()
+    {
+        return $this->package;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPatchType()
+    {
+        return $this->type;
     }
 
     /**
