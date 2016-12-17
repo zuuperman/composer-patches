@@ -1,0 +1,21 @@
+{
+    "name": "cweagans/composer-patches-test-project",
+    "description": "Project for use in cweagans/composer-patches acceptance tests.",
+    "type": "project",
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "Cameron Eagans",
+            "email": "me@cweagans.net"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../../../"
+        }
+    ],
+    "require": {
+        "cweagans/composer-patches": "*@dev"
+    }
+}
