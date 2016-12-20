@@ -28,6 +28,12 @@ class Acceptance extends \Codeception\Module
     {
         $filesystem = new Filesystem();
         $filesystem->remove($this->_getPluginDir());
+
+        $composerLockFiles = glob($this->_getFixturesDir() . '/*/composer.lock');
+        $filesystem->remove($composerLockFiles);
+
+        $composerVendorDirs = glob($this->_getFixturesDir() . '/*/vendor');
+        $filesystem->remove($composerVendorDirs);
     }
 
     protected function _getFixturesDir()
