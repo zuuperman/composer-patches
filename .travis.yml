@@ -11,14 +11,14 @@ php:
   - nightly
 
 env:
-  - TEST_TYPE=unit
-  - TEST_TYPE=acceptance
+  - PATCHES_TEST_SUITE=unit
+  - PATCHES_TEST_SUITE=acceptance
 
 matrix:
     fast_finish: true
     allow_failures:
         - php: nightly
-        - env: TEST_TYPE=acceptance
+        - env: PATCHES_TEST_SUITE=acceptance
 
 cache:
     directories:
@@ -29,8 +29,9 @@ install:
     - composer install --dev --no-interaction
 
 script:
-    - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run "${TEST_TYPE}"; fi;
-    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run --coverage-xml "${TEST_TYPE}"; fi;
+    - echo "${PATCHES_TEST_SUITE}"
+    - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run "${PATCHES_TEST_SUITE}"; fi;
+    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run --coverage-xml "${PATCHES_TEST_SUITE}"; fi;
 
 after_success:
     - if [ -f ./tests/_output/coverage.xml ]; then travis_retry ./vendor/bin/coveralls -v; fi;
