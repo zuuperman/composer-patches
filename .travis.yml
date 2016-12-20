@@ -10,10 +10,15 @@ php:
   - hhvm
   - nightly
 
+env:
+  - TEST_TYPE=unit
+  - TEST_TYPE=acceptance
+
 matrix:
     fast_finish: true
     allow_failures:
         - php: nightly
+        - env: TEST_TYPE=acceptance
 
 cache:
     directories:
@@ -24,8 +29,8 @@ install:
     - composer install --dev --no-interaction
 
 script:
-    - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run; fi;
-    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run --coverage-xml; fi;
+    - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run $TEST_TYPE; fi;
+    - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run --coverage-xml $TEST_TYPE; fi;
 
 after_success:
     - if [ -f ./tests/_output/coverage.xml ]; then travis_retry ./vendor/bin/coveralls -v; fi;
