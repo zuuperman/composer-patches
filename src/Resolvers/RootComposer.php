@@ -39,7 +39,6 @@ class RootComposer extends ResolverBase {
 
         foreach ($extra['patches'] as $package_name => $patches) {
             foreach ($patches as $patch_entry) {
-                $patch_entry->package = $package_name;
                 $patch = Patch::createFromJsonObject($package_name, $patch_entry, self::PATCH_TYPE);
                 $collection->addPatch($patch);
             }
