@@ -14,11 +14,16 @@ namespace cweagans\Composer;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
+use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
+use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 use Composer\Util\ProcessExecutor;
+use cweagans\Composer\Resolvers\PatchesFile;
+use cweagans\Composer\Resolvers\ResolverInterface;
+use cweagans\Composer\Resolvers\RootComposer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Patches implements PluginInterface, EventSubscriberInterface
@@ -50,6 +55,11 @@ class Patches implements PluginInterface, EventSubscriberInterface
     protected $patchCollection;
 
     /**
+     * @var bool
+     */
+    protected $patchesResolved;
+
+    /**
      * @var array
      */
     protected $config;
@@ -78,11 +88,53 @@ class Patches implements PluginInterface, EventSubscriberInterface
         return [
             ScriptEvents::PRE_INSTALL_CMD => '',
             ScriptEvents::PRE_UPDATE_CMD => '',
-            PackageEvents::PRE_PACKAGE_INSTALL => '',
-            PackageEvents::PRE_PACKAGE_UPDATE => '',
+            PackageEvents::PRE_PACKAGE_INSTALL => 'resolvePatches',
+            PackageEvents::PRE_PACKAGE_UPDATE => 'resolvePatches',
             PackageEvents::POST_PACKAGE_INSTALL => '',
             PackageEvents::POST_PACKAGE_UPDATE => '',
         ];
+    }
+
+    /**
+     * Gather patches that need to be applied to the current set of packages.
+     *
+     * Note that this work is done unconditionally if this plugin is enabled,
+     * even if patching is disabled in any way. The point where patches are
+     * applied is where the work will be skipped. It's done this way to ensure
+     * that patching can be disabled temporarily in a way that doesn't affect
+     * the contents of composer.lock
+     *
+     * @param PackageEvent $event
+     *   The PackageEvent passed by composer to the event listener.
+     *
+     * @todo Allow end users to define new resolvers and add them to the list.
+     *       This can be done by providing a plugin capability and an interface
+     *       to get more resolvers. This plugin can provide a reference implementation
+     *       as an example to follow (this plugin would provide it's own Resolvers via
+     *       a Resolvers provider).
+     */
+    public function resolvePatches(PackageEvent $event)
+    {
+        // No need to resolve patches more than once.
+        if ($this->patchesResolved) {
+            return;
+        }
+
+        // See note in docblock about converting this to a Composer plugin capability.
+        $resolvers = [
+            new RootComposer($this->composer, $event->getOperations()),
+            new PatchesFile($this->composer, $event->getOperations()),
+        ];
+
+        /** @var ResolverInterface $resolver */
+        foreach ($resolvers as $resolver) {
+            if ($resolver->isEnabled()) {
+                $this->io->write('  - <info>' . $resolver->getMessage() . '</info>');
+                $resolver->resolve($this->patchCollection);
+            }
+        }
+
+        $this->patchesResolved = TRUE;
     }
 
     /**
