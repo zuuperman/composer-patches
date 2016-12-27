@@ -38,4 +38,20 @@ class PatchCollection
 
         return $patches;
     }
+
+    /**
+     * Return a list of patches for a given package.
+     *
+     * @param $package_name
+     *
+     * @return Patch[]
+     */
+    public function getPatchesForPackage($package_name)
+    {
+        $patches = array_filter($this->patches, function (Patch $patch) use ($package_name) {
+           return ($patch->getPackageName() === $package_name);
+        });
+
+        return $patches;
+    }
 }

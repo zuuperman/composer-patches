@@ -60,6 +60,11 @@ class PatchCollectionTest extends Unit
         }
         $this->assertEquals($count, $patchCollection->getPatchCount('dependency'));
 
+        // Test the package filtering method.
+        $this->assertEquals(6, count($patchCollection->getPatchesForPackage('test/package')));
+        $patchCollection->addPatch($this->getMockPatch('another/package'));
+        $this->assertEquals(6, count($patchCollection->getPatchesForPackage('test/package')));
+        $this->assertEquals(1, count($patchCollection->getPatchesForPackage('another/package')));
     }
 
     protected function getMockPatch($packageName = 'test/package', $type = 'root') {
@@ -71,5 +76,5 @@ class PatchCollectionTest extends Unit
             'package' => $packageName,
         ]);
     }
-    
+
 }
