@@ -89,18 +89,8 @@ class PatchTest extends Unit
         $json = new \stdClass();
         $json->url = 'http://drupal.org';
         $json->description = 'Test patch';
-
-        $patch = Patch::createFromJsonObject('test/package', $json, 'test');
-        $jsonPatch = $patch->jsonSerialize();
-
-        $this->assertEquals($json->url, $jsonPatch->url);
-        $this->assertEquals($json->description, $jsonPatch->description);
-        $this->assertEquals(Patch::NO_CHECK_HASH, $jsonPatch->hash);
-
-        $json = new \stdClass();
-        $json->url = 'http://drupal.org';
-        $json->description = 'Test patch';
         $json->patch_level = 2;
+        $json->hash = 'da39a3ee5e6b4b0d3255bfef95601890afd80709';
 
         $patch = Patch::createFromJsonObject('test/package', $json, 'test');
         $jsonPatch = $patch->jsonSerialize();
@@ -108,7 +98,7 @@ class PatchTest extends Unit
         $this->assertEquals($json->url, $jsonPatch->url);
         $this->assertEquals($json->description, $jsonPatch->description);
         $this->assertEquals($json->patch_level, $jsonPatch->patch_level);
-        $this->assertEquals(Patch::NO_CHECK_HASH, $jsonPatch->hash);
+        $this->assertEquals($json->hash, $jsonPatch->hash);
     }
 
     /**

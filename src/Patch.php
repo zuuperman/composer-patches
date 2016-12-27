@@ -166,19 +166,16 @@ class Patch implements \JsonSerializable
 
     /**
      * Export this patch to a JSON object.
+     *
+     * Note that all properties should be set by the time that serialization
+     * happens.
      */
     public function jsonSerialize()
     {
         $patch = new \stdClass();
         $patch->description = $this->description;
         $patch->url = $this->url;
-
-        // We don't want to store this if there's no specific setting.
-        if ($this->patchLevel != self::PATCH_LEVEL_AUTO) {
-            $patch->patch_level = $this->patchLevel;
-        }
-
-        // @TODO: We should always store the hash in composer.lock.
+        $patch->patch_level = $this->patchLevel;
         $patch->hash = $this->hash;
         return $patch;
     }
