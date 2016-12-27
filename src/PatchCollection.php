@@ -9,7 +9,7 @@ class PatchCollection
     /**
      * @var Patch[]
      */
-    protected $patches;
+    protected $patches = array();
 
     /**
      * Add a patch to the list.

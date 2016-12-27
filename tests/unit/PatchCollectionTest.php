@@ -20,6 +20,9 @@ class PatchCollectionTest extends Unit
         // Create a PatchCollection and populate it with data.
         // We're using the Dummy class because it adds a way to check the Patch counts.
         $patchCollection = new PatchCollectionDummy();
+
+        $this->assertEmpty($patchCollection->getPatchesForPackage('test/package'));
+
         $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
         $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
         $patchCollection->addPatch($this->getMockPatch('test/package', 'root'));
