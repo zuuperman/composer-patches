@@ -11,7 +11,7 @@ use cweagans\Composer\Exception\DownloadFailureException;
 use cweagans\Composer\Exception\InvalidPatchException;
 use cweagans\Composer\Exception\VerificationFailureException;
 
-class Patch
+class Patch implements \JsonSerializable
 {
     /**
      * PATCH_LEVEL_AUTO will cause composer-patches to attempt to auto-apply the
@@ -162,6 +162,25 @@ class Patch
 
         // Finally, create a new instance of this class.
         return new static($package, $description, $url, $type, $hash, $patch_level);
+    }
+
+    /**
+     * Export this patch to a JSON object.
+     */
+    public function jsonSerialize()
+    {
+        $patch = new \stdClass();
+        $patch->description = $this->description;
+        $patch->url = $this->url;
+
+        // We don't want to store this if there's no specific setting.
+        if ($this->patchLevel != self::PATCH_LEVEL_AUTO) {
+            $patch->patch_level = $this->patchLevel;
+        }
+
+        // @TODO: We should always store the hash in composer.lock.
+        $patch->hash = $this->hash;
+        return $patch;
     }
 
     /**
