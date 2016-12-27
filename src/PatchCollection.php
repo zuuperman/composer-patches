@@ -15,6 +15,7 @@ class PatchCollection
      * Add a patch to the list.
      *
      * @param Patch $patch
+     * @todo Add a way to prevent adding duplicate patches to the collection.
      */
     public function addPatch(Patch $patch)
     {

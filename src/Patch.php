@@ -248,6 +248,8 @@ class Patch implements \JsonSerializable
      *
      * @throws DownloadFailureException
      *   Thrown when a patch cannot be downloaded or saved.
+     *
+     * @todo Cache downloaded patches.
      */
     public function download($localPathOverride = NULL)
     {
