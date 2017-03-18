@@ -17,6 +17,7 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
+use Composer\Package\Package;
 use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
@@ -86,12 +87,12 @@ class Patches implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ScriptEvents::PRE_INSTALL_CMD => '',
-            ScriptEvents::PRE_UPDATE_CMD => '',
+//            ScriptEvents::PRE_INSTALL_CMD => '',
+//            ScriptEvents::PRE_UPDATE_CMD => '',
             PackageEvents::PRE_PACKAGE_INSTALL => 'resolvePatches',
             PackageEvents::PRE_PACKAGE_UPDATE => 'resolvePatches',
-            PackageEvents::POST_PACKAGE_INSTALL => '',
-            PackageEvents::POST_PACKAGE_UPDATE => '',
+            PackageEvents::POST_PACKAGE_INSTALL => 'applyPatchOnInstall',
+            PackageEvents::POST_PACKAGE_UPDATE => 'applyPatchOnUpdate',
         ];
     }
 
@@ -112,6 +113,8 @@ class Patches implements PluginInterface, EventSubscriberInterface
      *       to get more resolvers. This plugin can provide a reference implementation
      *       as an example to follow (this plugin would provide it's own Resolvers via
      *       a Resolvers provider).
+     * @todo Add a composer.lock resolver and use the patches recorded in the
+     *       lockfile unless the user specifically wants to update patches.
      */
     public function resolvePatches(PackageEvent $event)
     {
@@ -135,6 +138,72 @@ class Patches implements PluginInterface, EventSubscriberInterface
         }
 
         $this->patchesResolved = TRUE;
+    }
+
+    /**
+     * Called by Composer after package installation.
+     *
+     * @param PackageEvent $event
+     */
+    public function applyPatchOnInstall(PackageEvent $event)
+    {
+        $this->applyPatchesToPackage($event->getOperation()->getPackage());
+    }
+
+    /**
+     * Called by Composer after package update.
+     *
+     * @param PackageEvent $event
+     */
+    public function applyPatchOnUpdate(PackageEvent $event)
+    {
+        $this->applyPatchesToPackage($event->getOperation()->getTargetPackage());
+    }
+
+    /**
+     * Apply patches to a given package.
+     *
+     * This function requires patches to have been resolved. During normal
+     * operation, Composer will make sure that this is done in the correct order.
+     *
+     * @param Package $package
+     *   The package to which patches will be applied.
+     */
+    public function applyPatchesToPackage(Package $package)
+    {
+        // Get the list of patches from the PatchCollection.
+        $patchesForPackage = $this->patchCollection->getPatchesForPackage($package->getName());
+
+        // If there aren't any patches to apply, we're done here.
+        if (empty($patchesForPackage)) {
+            $this->io->write('<info>No patches found for package ' . $package->getName() . '.</info>', TRUE, IOInterface::VERBOSE);
+            return;
+        }
+
+        // Let the user know that we're going to patch this package.
+        $this->io->write('  - Applying patches for <info>' . $package->getName() . '</info>.');
+
+        // Patches are tracked in composer.lock, so we'll need to modify the
+        // package data before it's saved.
+        $localRepository = $this->composer->getRepositoryManager()->getLocalRepository();
+        /** @var Package $localPackage */
+        $localPackage = $localRepository->findPackage($package->getName(), $package->getVersion());
+        $extra = $localPackage->getExtra();
+        $extra['patches'] = array();
+
+        // Get the installation path for the package.
+        $install_path = $this->composer
+            ->getInstallationManager()
+            ->getInstaller($package->getType())
+            ->getInstallPath($package);
+
+        // Process each patch object.
+        foreach ($patchesForPackage as $patch) {
+            $extra['patches'][] = $patch;
+        }
+
+        // Set the package's extra data to the modified version.
+        $localPackage->setExtra($extra);
     }
 
     /**

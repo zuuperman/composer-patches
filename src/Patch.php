@@ -7,10 +7,13 @@
 
 namespace cweagans\Composer;
 
+use Composer\IO\IOInterface;
+use Composer\Package\Package;
 use cweagans\Composer\Exception\DownloadFailureException;
 use cweagans\Composer\Exception\InvalidPatchException;
 use cweagans\Composer\Exception\VerificationFailureException;
 
+// @TODO: Remove $package references here - package should be passed in to applyTo()
 class Patch implements \JsonSerializable
 {
     /**
@@ -317,6 +320,35 @@ class Patch implements \JsonSerializable
 
         // Mark the patch as verified.
         $this->verified = TRUE;
+    }
+
+    /**
+     * Applies this Patch to a given Package.
+     *
+     * As part of this process, we'll try to guess which -p value to pass to
+     * `patch` and set $this->patch_level accordingly so that the value is
+     * saved in composer.lock. This behavior is bypassed if the patch_level
+     * is manually set in the patch definition.
+     *
+     * @param Package $package
+     *   The package that this Patch will be applied to.
+     */
+    public function applyTo(Package $package, $install_path)
+    {
+        // If we haven't already downloaded and verified the patch file, do so now.
+        if (!$this->localPath) {
+            $this->download();
+            $this->verifyPatch();
+        }
+
+        if ($this->patchLevel != self::PATCH_LEVEL_AUTO) {
+            // Apply patch with the specified patch level
+            return;
+        }
+
+        // Guess patch level
+        // Apply patch with guessed patch level
+
     }
 
     /**
