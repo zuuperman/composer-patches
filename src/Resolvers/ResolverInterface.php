@@ -8,6 +8,7 @@
 namespace cweagans\Composer\Resolvers;
 
 use Composer\Composer;
+use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use cweagans\Composer\PatchCollection;
 
@@ -32,7 +33,9 @@ interface ResolverInterface {
      *
      * @param PatchCollection $collection
      *   A collection of patches that will eventually be applied.
+     * @param PackageEvent $event
+     *   The event that's currently being responded to.
      * @return mixed
      */
-    public function resolve(PatchCollection $collection);
+    public function resolve(PatchCollection $collection, PackageEvent $event);
 }

@@ -7,6 +7,7 @@
 
 namespace cweagans\Composer\Resolvers;
 
+use Composer\Installer\PackageEvent;
 use cweagans\Composer\Exception\InvalidPatchesFileException;
 use cweagans\Composer\Patch;
 use cweagans\Composer\PatchCollection;
@@ -22,28 +23,20 @@ class PatchesFile extends ResolverBase {
     /**
      * {@inheritDoc}
      */
-    public function isEnabled()
+    public function resolve(PatchCollection $collection, PackageEvent $event)
     {
+        $this->io->write('  - <info>Gathering patches from patches file.</info>');
+
         $extra = $this->composer->getPackage()->getExtra();
-        return array_key_exists('patches-file', $extra) &&
+        $valid_patches_file = array_key_exists('patches-file', $extra) &&
             file_exists(realpath($extra['patches-file'])) &&
             is_readable(realpath($extra['patches-file']));
-    }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMessage()
-    {
-        return 'Gathering patches from patches file.';
-    }
+        // If we don't have a valid patches file, exit early.
+        if (!$valid_patches_file) {
+            return;
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function resolve(PatchCollection $collection)
-    {
-        $extra = $this->composer->getPackage()->getExtra();
         $patches_file = $extra['patches-file'];
         $patches = $this->readPatchesFile($patches_file);
 

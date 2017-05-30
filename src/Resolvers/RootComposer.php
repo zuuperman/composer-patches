@@ -7,6 +7,7 @@
 
 namespace cweagans\Composer\Resolvers;
 
+use Composer\Installer\PackageEvent;
 use cweagans\Composer\Patch;
 use cweagans\Composer\PatchCollection;
 
@@ -17,25 +18,15 @@ class RootComposer extends ResolverBase {
     /**
      * {@inheritDoc}
      */
-    public function isEnabled()
+    public function resolve(PatchCollection $collection, PackageEvent $event)
     {
-        return array_key_exists('patches', $this->getExtra());
-    }
+        $this->io->write('  - <info>Gathering patches from root package</info>');
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMessage()
-    {
-        return 'Gathering patches from root package.';
-    }
+        $extra = $this->composer->getPackage()->getExtra();
 
-    /**
-     * {@inheritDoc}
-     */
-    public function resolve(PatchCollection $collection)
-    {
-        $extra = $this->getExtra();
+        if (!isset($extra['patches'])) {
+            return;
+        }
 
         foreach ($extra['patches'] as $package_name => $patches) {
             foreach ($patches as $patch_entry) {
@@ -43,13 +34,5 @@ class RootComposer extends ResolverBase {
                 $collection->addPatch($patch);
             }
         }
-    }
-
-    /**
-     * Retrieve the 'extra' section from the root composer.json.
-     */
-    protected function getExtra()
-    {
-        return $this->composer->getPackage()->getExtra();
     }
 }

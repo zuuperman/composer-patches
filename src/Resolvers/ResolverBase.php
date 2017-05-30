@@ -8,6 +8,8 @@
 namespace cweagans\Composer\Resolvers;
 
 use Composer\Composer;
+use Composer\Installer\PackageEvent;
+use Composer\IO\IOInterface;
 use cweagans\Composer\PatchCollection;
 
 abstract class ResolverBase implements ResolverInterface {
@@ -22,30 +24,20 @@ abstract class ResolverBase implements ResolverInterface {
     /**
      * An array of operations that will be executed during this composer execution.
      *
-     * @var array
+     * @var IOInterface
      */
-    protected $operations;
+    protected $io;
 
     /**
      * {@inheritDoc}
      */
-    public function __construct(Composer $composer, array $operations) {
+    public function __construct(Composer $composer, IOInterface $io) {
         $this->composer = $composer;
-        $this->operations = $operations;
+        $this->io = $io;
     }
 
     /**
      * {@inheritdoc}
      */
-    abstract public function isEnabled();
-
-    /**
-     * {@inheritdoc}
-     */
-    abstract public function getMessage();
-
-    /**
-     * {@inheritdoc}
-     */
-    abstract public function resolve(PatchCollection $collection);
+    abstract public function resolve(PatchCollection $collection, PackageEvent $event);
 }

@@ -19,15 +19,11 @@ use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Plugin\Capable;
-use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 use Composer\Util\ProcessExecutor;
-use cweagans\Composer\Capability\ResolverProvider;
-use cweagans\Composer\Resolvers\PatchesFile;
 use cweagans\Composer\Resolvers\ResolverBase;
 use cweagans\Composer\Resolvers\ResolverInterface;
-use cweagans\Composer\Resolvers\RootComposer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Patches implements PluginInterface, EventSubscriberInterface, Capable
@@ -179,14 +175,9 @@ class Patches implements PluginInterface, EventSubscriberInterface, Capable
             return;
         }
 
-        $resolvers = $this->getPatchResolvers();
-
         /** @var ResolverInterface $resolver */
-        foreach ($resolvers as $resolver) {
-            if ($resolver->isEnabled()) {
-                $this->io->write('  - <info>' . $resolver->getMessage() . '</info>');
-                $resolver->resolve($this->patchCollection);
-            }
+        foreach ($this->getPatchResolvers() as $resolver) {
+            $resolver->resolve($this->patchCollection, $event);
         }
 
         $this->patchesResolved = TRUE;
