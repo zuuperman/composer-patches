@@ -18,16 +18,19 @@ use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
+use Composer\Plugin\Capable;
 use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 use Composer\Util\ProcessExecutor;
+use cweagans\Composer\Capability\ResolverProvider;
 use cweagans\Composer\Resolvers\PatchesFile;
+use cweagans\Composer\Resolvers\ResolverBase;
 use cweagans\Composer\Resolvers\ResolverInterface;
 use cweagans\Composer\Resolvers\RootComposer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class Patches implements PluginInterface, EventSubscriberInterface
+class Patches implements PluginInterface, EventSubscriberInterface, Capable
 {
    use ConfigurablePlugin;
 
@@ -78,10 +81,11 @@ class Patches implements PluginInterface, EventSubscriberInterface
                 'type' => 'bool',
                 'default' => TRUE,
             ],
-            'dependency-patching-enabled' => [
-                'type' => 'bool',
-                'default' => TRUE,
-            ],
+// @TODO: Replace this with the ability to ignore a particular PatchResolver.
+//            'dependency-patching-enabled' => [
+//                'type' => 'bool',
+//                'default' => TRUE,
+//            ],
             'stop-on-patch-failure' => [
                 'type' => 'bool',
                 'default' => TRUE,
@@ -110,6 +114,50 @@ class Patches implements PluginInterface, EventSubscriberInterface
     }
 
     /**
+     * Return a list of plugin capabilities.
+     *
+     * @return array
+     */
+    public function getCapabilities()
+    {
+        return [
+            'cweagans\Composer\Capability\ResolverProvider' => 'cweagans\Composer\Capability\CoreResolverProvider',
+        ];
+    }
+
+    /**
+     * Gather a list of all patch resolvers.
+     *
+     * @return ResolverBase[]
+     *   A list of PatchResolvers to be run.
+     *
+     * @todo Add config option to disable specific resolvers - list of classes to skip.
+     */
+    public function getPatchResolvers()
+    {
+        $resolvers = [];
+
+        $plugin_manager = $this->composer->getPluginManager();
+        foreach ($plugin_manager->getPluginCapabilities('cweagans\Composer\Capability\ResolverProvider', ['composer' => $this->composer, 'io' => $this->io]) as $capability) {
+            /** @var \cweagans\Composer\Capability\ResolverProvider $capability */
+            $newResolvers = $capability->getResolvers();
+            if (!is_array($newResolvers)) {
+                throw new \UnexpectedValueException('Plugin capability ' . get_class($capability) . ' failed to return an array from getResolvers().');
+            }
+
+            foreach ($newResolvers as $resolver) {
+                if (!$resolver instanceof ResolverBase) {
+                    throw new \UnexpectedValueException('Plugin capability ' . get_class($capability) . ' returned an invalid value.');
+                }
+            }
+
+            $resolvers = array_merge($resolvers, $newResolvers);
+        }
+
+        return $resolvers;
+    }
+
+    /**
      * Gather patches that need to be applied to the current set of packages.
      *
      * Note that this work is done unconditionally if this plugin is enabled,
@@ -121,11 +169,6 @@ class Patches implements PluginInterface, EventSubscriberInterface
      * @param PackageEvent $event
      *   The PackageEvent passed by composer to the event listener.
      *
-     * @todo Allow end users to define new resolvers and add them to the list.
-     *       This can be done by providing a plugin capability and an interface
-     *       to get more resolvers. This plugin can provide a reference implementation
-     *       as an example to follow (this plugin would provide it's own Resolvers via
-     *       a Resolvers provider).
      * @todo Add a composer.lock resolver and use the patches recorded in the
      *       lockfile unless the user specifically wants to update patches.
      */
@@ -136,11 +179,7 @@ class Patches implements PluginInterface, EventSubscriberInterface
             return;
         }
 
-        // See note in docblock about converting this to a Composer plugin capability.
-        $resolvers = [
-            new RootComposer($this->composer, $event->getOperations()),
-            new PatchesFile($this->composer, $event->getOperations()),
-        ];
+        $resolvers = $this->getPatchResolvers();
 
         /** @var ResolverInterface $resolver */
         foreach ($resolvers as $resolver) {
