@@ -53,5 +53,4 @@ class PatchesPluginTest extends Unit
             $this->assertArrayHasKey($event_name, $plugin_events);
         }
     }
-
 }

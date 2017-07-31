@@ -12,7 +12,8 @@ class PatchCollectionDummy extends PatchCollection
      * @param string $type
      * @return int
      */
-    public function getPatchCount($type = 'all') {
+    public function getPatchCount($type = 'all')
+    {
         return count($this->getPatches($type));
     }
 }

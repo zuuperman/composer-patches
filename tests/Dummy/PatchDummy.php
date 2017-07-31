@@ -12,14 +12,16 @@ class PatchDummy extends Patch
      * @return string
      *   The patch location.
      */
-    public function getLocalPath() {
+    public function getLocalPath()
+    {
         return $this->localPath;
     }
 
     /**
      * Set the local path to force behaviors during testing.
      */
-    public function setLocalPath($localPath) {
+    public function setLocalPath($localPath)
+    {
         $this->localPath = $localPath;
     }
 }

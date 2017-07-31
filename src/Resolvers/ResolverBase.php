@@ -12,7 +12,8 @@ use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use cweagans\Composer\PatchCollection;
 
-abstract class ResolverBase implements ResolverInterface {
+abstract class ResolverBase implements ResolverInterface
+{
 
     /**
      * The main Composer object.
@@ -31,7 +32,8 @@ abstract class ResolverBase implements ResolverInterface {
     /**
      * {@inheritDoc}
      */
-    public function __construct(Composer $composer, IOInterface $io) {
+    public function __construct(Composer $composer, IOInterface $io)
+    {
         $this->composer = $composer;
         $this->io = $io;
     }

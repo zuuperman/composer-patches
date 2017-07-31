@@ -11,7 +11,8 @@ use Composer\Installer\PackageEvent;
 use cweagans\Composer\Patch;
 use cweagans\Composer\PatchCollection;
 
-class RootComposer extends ResolverBase {
+class RootComposer extends ResolverBase
+{
 
     const PATCH_TYPE = 'root';
 

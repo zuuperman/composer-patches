@@ -2,4 +2,6 @@
 
 namespace cweagans\Composer\Exception;
 
-class DownloadFailureException extends \Exception {}
+class DownloadFailureException extends \Exception
+{
+}

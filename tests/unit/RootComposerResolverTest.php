@@ -50,5 +50,4 @@ class RootComposerResolverTest extends Unit
         $resolver->resolve($patch_collection, $event);
         $this->assertEquals(1, $patch_collection->getPatchCount());
     }
-
 }

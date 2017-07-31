@@ -81,10 +81,10 @@ class Patch implements \JsonSerializable
 
     /**
      * @var bool
-     *   FALSE if patch has not been verified against a SHA-1 hash. TRUE after
+     *   false if patch has not been verified against a SHA-1 hash. true after
      *   successful verification.
      */
-    protected $verified = FALSE;
+    protected $verified = false;
 
     /**
      * Patch constructor.
@@ -96,7 +96,7 @@ class Patch implements \JsonSerializable
      * @param $hash
      * @param $patchLevel
      */
-    public function __construct($package, $description, $url, $type, $hash = NULL, $patchLevel = NULL)
+    public function __construct($package, $description, $url, $type, $hash = null, $patchLevel = null)
     {
         $this->package = $package;
         $this->description = $description;
@@ -114,8 +114,7 @@ class Patch implements \JsonSerializable
         if (isset($hash)) {
             if ($this->isValidSha1($hash)) {
                 $this->hash = $hash;
-            }
-            else {
+            } else {
                 throw new \InvalidArgumentException('Invalid SHA-1 hash supplied for patch with url ' . $url);
             }
         }
@@ -152,13 +151,13 @@ class Patch implements \JsonSerializable
         $url = $jsonObject['url'];
 
         // If there's a hash, use it.
-        $hash = NULL;
+        $hash = null;
         if (isset($jsonObject['hash'])) {
             $hash = $jsonObject['hash'];
         }
 
         // If there's a patch level, use it.
-        $patch_level = NULL;
+        $patch_level = null;
         if (isset($jsonObject['patch_level'])) {
             $patch_level = $jsonObject['patch_level'];
         }
@@ -251,7 +250,7 @@ class Patch implements \JsonSerializable
      *
      * @todo Cache downloaded patches.
      */
-    public function download($localPathOverride = NULL)
+    public function download($localPathOverride = null)
     {
         // If we've already got the localPath, we can skip the rest.
         if (isset($this->localPath)) {
@@ -268,13 +267,13 @@ class Patch implements \JsonSerializable
         // Download file from remote filesystem to that location.
         // The error suppression operator is intentional. Exceptions > warnings.
         $patch_contents = @file_get_contents($this->url);
-        if (FALSE === $patch_contents) {
+        if (false === $patch_contents) {
             throw new DownloadFailureException('Could not download patch from ' . $this->url);
         }
 
         // The error suppression operator is intentional. Exceptions > warnings.
         $bytes_written = @file_put_contents($filename, $patch_contents);
-        if (FALSE === $bytes_written) {
+        if (false === $bytes_written) {
             throw new DownloadFailureException('Could not write patch to ' . $filename);
         }
 
@@ -296,7 +295,7 @@ class Patch implements \JsonSerializable
         // If we can't load the patch, that's going to be a problem.
         // The error suppression operator is intentional. Exceptions > warnings.
         $patch_contents = @file_get_contents($this->localPath);
-        if ($patch_contents === FALSE) {
+        if ($patch_contents === false) {
             throw new VerificationFailureException('Could not load patch from ' . $this->localPath);
         }
 
@@ -310,8 +309,7 @@ class Patch implements \JsonSerializable
             // it can at least guarantee that every composer run is using the same
             // patch.
             $this->hash = $patch_hash;
-        }
-        else {
+        } else {
             // Otherwise, we just need to complain if there is a hash mismatch.
             if ($this->hash !== $patch_hash) {
                 throw new VerificationFailureException('SHA-1 mismatch for patch downloaded from ' . $this->url);
@@ -319,7 +317,7 @@ class Patch implements \JsonSerializable
         }
 
         // Mark the patch as verified.
-        $this->verified = TRUE;
+        $this->verified = true;
     }
 
     /**
@@ -348,7 +346,6 @@ class Patch implements \JsonSerializable
 
         // Guess patch level
         // Apply patch with guessed patch level
-
     }
 
     /**
@@ -371,5 +368,4 @@ class Patch implements \JsonSerializable
             unlink($this->localPath);
         }
     }
-
 }

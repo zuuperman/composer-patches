@@ -70,7 +70,8 @@ class PatchCollectionTest extends Unit
         $this->assertEquals(1, count($patchCollection->getPatchesForPackage('another/package')));
     }
 
-    protected function getMockPatch($packageName = 'test/package', $type = 'root') {
+    protected function getMockPatch($packageName = 'test/package', $type = 'root')
+    {
         // Return a mocked Patch
         return Stub::make(Patch::class, [
             'description' => 'Test Patch',
@@ -79,5 +80,4 @@ class PatchCollectionTest extends Unit
             'package' => $packageName,
         ]);
     }
-
 }

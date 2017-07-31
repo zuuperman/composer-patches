@@ -2,4 +2,6 @@
 
 namespace cweagans\Composer\Exception;
 
-class VerificationFailureException extends \Exception {}
+class VerificationFailureException extends \Exception
+{
+}

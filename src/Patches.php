@@ -28,7 +28,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Patches implements PluginInterface, EventSubscriberInterface, Capable
 {
-   use ConfigurablePlugin;
+    use ConfigurablePlugin;
 
     /**
      * @var Composer
@@ -75,16 +75,16 @@ class Patches implements PluginInterface, EventSubscriberInterface, Capable
         $this->configuration = [
             'patching-enabled' => [
                 'type' => 'bool',
-                'default' => TRUE,
+                'default' => true,
             ],
 // @TODO: Replace this with the ability to ignore a particular PatchResolver.
 //            'dependency-patching-enabled' => [
 //                'type' => 'bool',
-//                'default' => TRUE,
+//                'default' => true,
 //            ],
             'stop-on-patch-failure' => [
                 'type' => 'bool',
-                'default' => TRUE,
+                'default' => true,
             ],
             'ignore-packages' => [
                 'type' => 'list',
@@ -134,16 +134,23 @@ class Patches implements PluginInterface, EventSubscriberInterface, Capable
         $resolvers = [];
 
         $plugin_manager = $this->composer->getPluginManager();
-        foreach ($plugin_manager->getPluginCapabilities('cweagans\Composer\Capability\ResolverProvider', ['composer' => $this->composer, 'io' => $this->io]) as $capability) {
+        foreach ($plugin_manager->getPluginCapabilities(
+            'cweagans\Composer\Capability\ResolverProvider',
+            ['composer' => $this->composer, 'io' => $this->io]
+        ) as $capability) {
             /** @var \cweagans\Composer\Capability\ResolverProvider $capability */
             $newResolvers = $capability->getResolvers();
             if (!is_array($newResolvers)) {
-                throw new \UnexpectedValueException('Plugin capability ' . get_class($capability) . ' failed to return an array from getResolvers().');
+                throw new \UnexpectedValueException(
+                    'Plugin capability ' . get_class($capability) . ' failed to return an array from getResolvers().'
+                );
             }
 
             foreach ($newResolvers as $resolver) {
                 if (!$resolver instanceof ResolverBase) {
-                    throw new \UnexpectedValueException('Plugin capability ' . get_class($capability) . ' returned an invalid value.');
+                    throw new \UnexpectedValueException(
+                        'Plugin capability ' . get_class($capability) . ' returned an invalid value.'
+                    );
                 }
             }
 
@@ -180,7 +187,7 @@ class Patches implements PluginInterface, EventSubscriberInterface, Capable
             $resolver->resolve($this->patchCollection, $event);
         }
 
-        $this->patchesResolved = TRUE;
+        $this->patchesResolved = true;
     }
 
     /**
@@ -219,7 +226,11 @@ class Patches implements PluginInterface, EventSubscriberInterface, Capable
 
         // If there aren't any patches to apply, we're done here.
         if (empty($patchesForPackage)) {
-            $this->io->write('<info>No patches found for package ' . $package->getName() . '.</info>', TRUE, IOInterface::VERBOSE);
+            $this->io->write(
+                '<info>No patches found for package ' . $package->getName() . '.</info>',
+                true,
+                IOInterface::VERBOSE
+            );
             return;
         }
 

@@ -30,6 +30,7 @@ install:
     - composer install --dev --no-interaction
 
 script:
+    - ./vendor/bin/grumphp run
     - echo "${PATCHES_TEST_SUITE}"
     - if [ "${TRAVIS_PHP_VERSION}" != "7.0" ]; then ./vendor/bin/codecept run "${PATCHES_TEST_SUITE}"; fi;
     - if [ "${TRAVIS_PHP_VERSION}" == "7.0" ]; then ./vendor/bin/codecept run "${PATCHES_TEST_SUITE}" --coverage-xml; fi;

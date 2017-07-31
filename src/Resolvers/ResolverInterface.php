@@ -12,7 +12,8 @@ use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use cweagans\Composer\PatchCollection;
 
-interface ResolverInterface {
+interface ResolverInterface
+{
 
     /**
      * ResolverInterface constructor.

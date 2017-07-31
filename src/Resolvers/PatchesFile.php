@@ -12,7 +12,8 @@ use cweagans\Composer\Exception\InvalidPatchesFileException;
 use cweagans\Composer\Patch;
 use cweagans\Composer\PatchCollection;
 
-class PatchesFile extends ResolverBase {
+class PatchesFile extends ResolverBase
+{
 
     /**
      * We're going to consider patches declared in a patches file the same as
@@ -60,7 +61,7 @@ class PatchesFile extends ResolverBase {
     protected function readPatchesFile($patches_file)
     {
         $patches = file_get_contents($patches_file);
-        $patches = json_decode($patches, TRUE);
+        $patches = json_decode($patches, true);
 
         // First, check for JSON syntax issues.
         $error = json_last_error();
@@ -102,5 +103,4 @@ class PatchesFile extends ResolverBase {
         // If nothing is wrong at this point, we can return the list of patches.
         return $patches['patches'];
     }
-
 }

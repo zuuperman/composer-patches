@@ -32,7 +32,8 @@ abstract class BaseResolverProvider implements Capability
      * @param array $ctorargs
      *   An array of args passed by the plugin manager.
      */
-    public function __construct($ctorargs) {
+    public function __construct($ctorargs)
+    {
         $this->composer = $ctorargs['composer'];
         $this->io = $ctorargs['io'];
         $this->plugin = $ctorargs['plugin'];

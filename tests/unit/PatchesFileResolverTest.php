@@ -48,8 +48,7 @@ class PatchesFileResolverTest extends Unit
             $collection = new PatchCollectionDummy();
             $resolver = new PatchesFile($composer, $io);
             $resolver->resolve($collection, $event);
-        }
-        catch (InvalidPatchesFileException $e) {
+        } catch (InvalidPatchesFileException $e) {
             $this->assertEquals('No patches found.', $e->getMessage());
         }
 
@@ -64,10 +63,8 @@ class PatchesFileResolverTest extends Unit
             $collection = new PatchCollectionDummy();
             $resolver = new PatchesFile($composer, $io);
             $resolver->resolve($collection, $event);
-        }
-        catch (InvalidPatchesFileException $e) {
+        } catch (InvalidPatchesFileException $e) {
             $this->assertEquals('Syntax error, malformed JSON.', $e->getMessage());
         }
     }
-
 }

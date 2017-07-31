@@ -10,7 +10,8 @@ namespace cweagans\Composer\Event;
 use Composer\EventDispatcher\Event;
 use cweagans\Composer\Patch;
 
-class PatchEvent extends Event {
+class PatchEvent extends Event
+{
 
     /**
      * @var Patch;
@@ -25,7 +26,8 @@ class PatchEvent extends Event {
      * @param Patch $patch
      *   The patch that emitted this event.
      */
-    public function __construct($eventName, Patch $patch) {
+    public function __construct($eventName, Patch $patch)
+    {
         parent::__construct($eventName);
         $this->patch = $patch;
     }
@@ -39,5 +41,4 @@ class PatchEvent extends Event {
     {
         return $this->patch;
     }
-
 }

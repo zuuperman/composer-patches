@@ -2,4 +2,6 @@
 
 namespace cweagans\Composer\Exception;
 
-class InvalidPatchesFileException extends \Exception {}
+class InvalidPatchesFileException extends \Exception
+{
+}
