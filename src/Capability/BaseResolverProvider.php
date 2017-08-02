@@ -29,14 +29,14 @@ abstract class BaseResolverProvider implements Capability
      *
      * Stores values passed by the plugin manager for later use.
      *
-     * @param array $ctorargs
+     * @param array $args
      *   An array of args passed by the plugin manager.
      */
-    public function __construct($ctorargs)
+    public function __construct($args)
     {
-        $this->composer = $ctorargs['composer'];
-        $this->io = $ctorargs['io'];
-        $this->plugin = $ctorargs['plugin'];
+        $this->composer = $args['composer'];
+        $this->io = $args['io'];
+        $this->plugin = $args['plugin'];
     }
 
     /**
